@@ -14,7 +14,7 @@ class AuthStorage {
     await _secureStorage.write(key:_identifier, value: json);
   }
 
-  Future<T> loadTokenToCache<T extends Token>() async {
+  Future<T> loadTokenFromCache<T extends Token>() async {
     var json = await _secureStorage.read(key:_identifier);
     if (json == null) return null;
     try {

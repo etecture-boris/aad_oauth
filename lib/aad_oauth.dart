@@ -48,7 +48,11 @@ class AadOAuth {
     return _token.accessToken;
   }
 
-  bool tokenIsValid() {
+  Future<bool> tokenIsValid() async {
+    if (_token == null) {
+      _token = await _authStorage.loadTokenFromCache();
+    }
+
     return Token.tokenIsValid(_token);
   }
 
@@ -61,7 +65,7 @@ class AadOAuth {
 
   Future<void> _performAuthorization() async {
     // load token from cache
-    _token = await _authStorage.loadTokenToCache();
+    _token = await _authStorage.loadTokenFromCache();
 
     //still have refreh token / try to get new access token with refresh token
     if (_token != null)
