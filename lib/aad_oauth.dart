@@ -1,13 +1,15 @@
 library aad_oauth;
 
-import 'model/config.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'helper/auth_storage.dart';
+import 'model/config.dart';
 import 'model/token.dart';
 import 'request_code.dart';
 import 'request_token.dart';
-import 'dart:async';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AadOAuth {
   static Config _config;
@@ -17,7 +19,7 @@ class AadOAuth {
   RequestToken _requestToken;
 
   factory AadOAuth(config) {
-    if ( AadOAuth._instance == null )
+    if (AadOAuth._instance == null)
       AadOAuth._instance = new AadOAuth._internal(config);
     return _instance;
   }
@@ -37,18 +39,19 @@ class AadOAuth {
 
   Future<void> login() async {
     await _removeOldTokenOnFirstLogin();
-    if (!Token.tokenIsValid(_token) )
+    if (!Token.tokenIsValid(_token))
       await _performAuthorization();
   }
 
   Future<String> getAccessToken() async {
-    if (!Token.tokenIsValid(_token) )
+    if (!Token.tokenIsValid(_token))
       await _performAuthorization();
 
     return _token.accessToken;
   }
 
   Future<bool> tokenIsValid() async {
+    // if first start (app restart for example) try to get token from cache at first
     if (_token == null) {
       _token = await _authStorage.loadTokenFromCache();
     }
@@ -67,7 +70,7 @@ class AadOAuth {
     // load token from cache
     _token = await _authStorage.loadTokenFromCache();
 
-    //still have refreh token / try to get new access token with refresh token
+    //still have refresh token / try to get new access token with refresh token
     if (_token != null)
       await _performRefreshAuthFlow();
 
@@ -88,7 +91,11 @@ class AadOAuth {
     String code;
     try {
       code = await _requestCode.requestCode();
-      _token = await _requestToken.requestToken(code);
+      if (code != null && code.isNotEmpty) {
+        _token = await _requestToken.requestToken(code);
+      } else {
+        throw Exception('Access denied or authentation canceled.');
+      }
     } catch (e) {
       rethrow;
     }
