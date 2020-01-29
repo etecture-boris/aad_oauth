@@ -5,6 +5,12 @@ A Flutter OAuth package for performing user authentication against Azure Active 
 Supported Flows:
  - [Authorization code flow (including refresh token flow)](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow)
 
+## Difference to Earlybyte/aad_oauth repo
+1. extend method `tokenIsValid()` 
+   - add logic if token is null try to get token from cache
+2. move Exception `Access denied or authentation canceled.` from `requestCode()` one method up 
+   - previous Exception wasn't rethrown in own code
+
 ## Usage
 
 For using this library you have to create an azure app at the [Azure App registration portal](https://apps.dev.microsoft.com/). Use native app as platform type (with callback URL: https://login.live.com/oauth20_desktop.srf).
@@ -43,7 +49,10 @@ Add the following to your pubspec.yaml dependencies:
 
 ```yaml
 dependencies:
-  aad_oauth: "^0.1.7"
+  aad_oauth:
+    git:
+      url: https://github.com/etecture-boris/aad_oauth.git
+      ref: master
 ```
 
 ## Contribution
