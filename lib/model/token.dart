@@ -3,6 +3,7 @@ class Token {
   final expireOffSet = 5;
 
   String accessToken;
+  String idToken;
   String tokenType;
   String refreshToken;
   DateTime issueTimeStamp;
@@ -24,6 +25,9 @@ class Token {
       if (model.accessToken != null) {
         ret["access_token"] = model.accessToken;
       }
+      if (model.idToken != null) {
+        ret["id_token"] = model.idToken;
+      }
       if (model.tokenType != null) {
         ret["token_type"] = model.tokenType;
       }
@@ -43,24 +47,17 @@ class Token {
   static Token fromMap(Map map) {
     if (map == null) throw new Exception("No token from received");
     //error handling as described in https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow#error-response-1
-    if (map["error"] != null)
-      throw new Exception("Error during token request: " +
-          map["error"] +
-          ": " +
-          map["error_description"]);
+    if (map["error"] != null) throw new Exception("Error during token request: " + map["error"] + ": " + map["error_description"]);
 
     Token model = new Token();
     model.accessToken = map["access_token"];
+    model.idToken = map["id_token"];
     model.tokenType = map["token_type"];
-    model.expiresIn = map["expires_in"] is int
-        ? map["expires_in"]
-        : int.tryParse(map["expires_in"].toString()) ?? 60;
+    model.expiresIn = map["expires_in"] is int ? map["expires_in"] : int.tryParse(map["expires_in"].toString()) ?? 60;
     model.refreshToken = map["refresh_token"];
     model.issueTimeStamp = new DateTime.now().toUtc();
-    model.expireTimeStamp = map.containsKey("expire_timestamp")
-        ? DateTime.fromMillisecondsSinceEpoch(map["expire_timestamp"])
-        : model.issueTimeStamp
-            .add(new Duration(seconds: model.expiresIn - model.expireOffSet));
+    model.expireTimeStamp =
+        map.containsKey("expire_timestamp") ? DateTime.fromMillisecondsSinceEpoch(map["expire_timestamp"]) : model.issueTimeStamp.add(new Duration(seconds: model.expiresIn - model.expireOffSet));
     return model;
   }
 
@@ -69,8 +66,6 @@ class Token {
   }
 
   static bool tokenIsValid(Token token) {
-    return token != null &&
-        !Token.isExpired(token) &&
-        token.accessToken != null;
+    return token != null && !Token.isExpired(token) && token.accessToken != null && token.idToken != null;
   }
 }

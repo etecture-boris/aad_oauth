@@ -6,10 +6,11 @@ Supported Flows:
  - [Authorization code flow (including refresh token flow)](https://docs.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-auth-code-flow)
 
 ## Difference to Earlybyte/aad_oauth repo
-1. extend method `tokenIsValid()` 
+1. extend method `tokenIsValid()`
    - add logic if token is null try to get token from cache
-2. move Exception `Access denied or authentation canceled.` from `requestCode()` one method up 
+2. move Exception `Access denied or authentation canceled.` from `requestCode()` one method up
    - previous Exception wasn't rethrown in own code
+3. add method getIdToken()
 
 ## Usage
 
